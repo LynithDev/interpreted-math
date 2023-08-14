@@ -1,5 +1,3 @@
-use std::process::exit;
-
 use crate::{token::{Token, find_variable}, token_type::TokenType, evaluators::{postfix_evaluator::PostfixEvaluator, Evaluator}};
 
 use super::{Parser, infix_parser::InfixParser};
@@ -14,14 +12,12 @@ impl SyntaxParser {
     fn parse(&self, input: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
         let mut tokens: Vec<Token> = Vec::new();
 
-        let mut token: Option<Token> = None;
-
         let mut expression_stack: String = String::new();
         let mut string_stack: String = String::new();
 
         let mut naming: bool = false;
 
-        for line in input.lines() {
+        for (line_number, line) in input.lines().enumerate() {
             let line = line.trim_start();
 
             if line.starts_with("#") {
@@ -51,10 +47,9 @@ impl SyntaxParser {
     
                     '=' | '\n' => { // Termination for variables
                         if naming && !string_stack.is_empty() {
-                            token = Some(Token::new(TokenType::new_variable(string_stack.to_owned(), None)));
+                            tokens.push(Token::new(TokenType::new_variable(string_stack.to_owned(), None)));
                             naming = false;
                             string_stack = String::new();
-                            tokens.push(token.unwrap().to_owned());
                             continue;
                         }
                     }
@@ -73,7 +68,7 @@ impl SyntaxParser {
             if !expression_stack.is_empty() {
                 let value = match infix_evaluation(&expression_stack) {
                     Ok(n) => n,
-                    Err(e) => return Err(e)
+                    Err(e) => return Err(format!("Line {}: {}", line_number + 1, e).into())
                 };
 
                 if !line.starts_with("$") {
@@ -105,8 +100,19 @@ impl SyntaxParser {
 
         }
 
-        println!("{:#?}", tokens);
+        if std::env::args().len() > 2 && std::env::args().nth(2).eq(&Some("true".to_string())) {
+            println!("{:#?}", tokens);
+        }
         
+        for token in tokens {
+            match token.token_type {
+                TokenType::Expression { value } => {
+                    return Ok(Some(value.to_string()));
+                },
+                _ => {}
+            }
+        }
+
         Ok(None)
     }
 }

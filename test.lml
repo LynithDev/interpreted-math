@@ -1,3 +1,7 @@
 # Comments are defined with #
-$bcd = 3 + 1
-3 + bcd
+$a = 2 + 2
+$b = a + 1
+
+ab
+5
+6

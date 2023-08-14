@@ -22,3 +22,14 @@ $b = 4 + 1
 $c = a + b # To use variables, you don't use the $ symbol, letters are syntax / variables
 c
 ```
+
+## Goal(s)
+- Easy way to write and evaluate long math expressions
+- functions
+- variables
+- constants
+- conditional logic (<, >, ==, !=, <=, >=, &&, ||, !)
+
+### If I don't get bored
+- loops
+- lists

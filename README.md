@@ -3,6 +3,13 @@ Wanted to practice Rust, so I made an interpreted language specifically designed
 
 It's not optimised at all, and the code is probably terrible, but it works!
 
+## Usage:
+`binary <file> [debugMode]`
+- <file> is required
+- [debugMode] is optional (has to be true to be enabled)
+
+Eg: `cargo run -- ./guide/1_basic.lml true`
+
 ## Eg script:
 
 ```php

@@ -18,6 +18,7 @@ impl SyntaxParser {
         let mut naming: bool = false;
         let mut full_variable_name: bool = false;
 
+        #[allow(unused_labels)]
         'line_loop: for (line_number, line) in input.lines().enumerate() {
             let line = line.trim_start();
 
@@ -66,7 +67,6 @@ impl SyntaxParser {
                                     
                                     expression_stack.push_str(var.1.unwrap_or_else(|| 0.0).to_string().as_str());
                                     string_stack = String::new();
-                                    println!("{}", expression_stack);
                                 },
                                 None => {}
                             }

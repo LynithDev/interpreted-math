@@ -1,8 +1,4 @@
-# Comments are defined with #
-$a = 2 + 2 # = 4
-$b = aa + 1 # 4 * 4 + 1 = 17
-ab # 4 * 17 = 68
-
-#$co = 2
-#$cool = 6
-#co + [cool]
+$a = 2
+$b = a
+$a = 3
+a

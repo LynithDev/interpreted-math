@@ -77,6 +77,18 @@ impl SyntaxParser {
     
                     '=' | '\n' => { // Termination for variables
                         if naming && !string_stack.is_empty() {
+                            // Remove duplicate variables
+                            for (i, token) in tokens.to_owned().iter().enumerate() {
+                                match &token.token_type {
+                                    TokenType::Variable { name, value:_ } => {
+                                        if name.eq(string_stack.to_owned().as_str()) {
+                                            tokens.remove(i);
+                                        }
+                                    },
+                                    _ => {}
+                                }
+                            }
+
                             tokens.push(Token::new(TokenType::new_variable(string_stack.to_owned(), None)));
                             naming = false;
                             string_stack = String::new();

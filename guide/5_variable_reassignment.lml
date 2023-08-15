@@ -1,0 +1,7 @@
+# You can reassign variables by simply defining them again:
+$a = 5
+$b = a
+
+$a = 2
+
+ab # = 10, try commenting line 5 and see how '10' changes into '25'

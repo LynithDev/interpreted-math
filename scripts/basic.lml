@@ -1,0 +1,7 @@
+# This is a file showing how to do basic equations
+# Defining variables MUST begin with $
+
+$var = 5 + 2
+var + 1 # Returns 8
+
+# The first line containing no-assignments is a return to the interpreter 

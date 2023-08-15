@@ -1,4 +1,4 @@
-use crate::{token::{Token, find_variable}, token_type::TokenType, evaluators::{postfix_evaluator::PostfixEvaluator, Evaluator}};
+use crate::{token::{Token, find_variable}, token_type::TokenType, evaluators::{postfix_evaluator::PostfixEvaluator, Evaluator}, is_operator};
 
 use super::{Parser, infix_parser::InfixParser};
 
@@ -16,30 +16,60 @@ impl SyntaxParser {
         let mut string_stack: String = String::new();
 
         let mut naming: bool = false;
+        let mut full_variable_name: bool = false;
 
-        for (line_number, line) in input.lines().enumerate() {
+        'line_loop: for (line_number, line) in input.lines().enumerate() {
             let line = line.trim_start();
 
             if line.starts_with("#") {
                 continue;
             }
 
-            for symbol in line.chars() {
+            'symbol_loop: for (symbol_index, symbol) in line.chars().enumerate() {
                 match symbol {
-                    '#' => continue, // Comments
+                    '#' => break 'symbol_loop, // Comments
 
                     ' ' => continue,
 
-                    symbol if symbol.is_ascii_alphabetic() => {
+                    '[' => {
+                        full_variable_name = true;
+                        continue;
+                    }
+
+                    symbol if symbol.is_ascii_alphabetic() || symbol.eq(&']') => {
+
                         string_stack.push(symbol);
                         
-                        match find_variable(&tokens, string_stack.to_owned()) {
-                            Some(var) => {
-                                string_stack.truncate(string_stack.len() - var.0.len());
-                                expression_stack.push_str(var.1.unwrap_or_else(|| 0.0).to_string().as_str());
-                                string_stack = String::new();
-                            },
-                            None => {}
+                        if full_variable_name && !symbol.eq(&']') {
+                            continue;
+                        }
+                        
+                        if !naming {
+                            if symbol.eq(&']') {
+                                full_variable_name = false;
+                                string_stack.pop();
+                            }
+                            
+                            match find_variable(&tokens, string_stack.to_owned()) {
+                                Some(var) => {
+                                    string_stack.truncate(string_stack.len() - var.0.len());
+                                    
+                                    if symbol_index != 0 
+                                    && line.chars().nth(symbol_index - 1).is_some()
+                                    && line.chars().nth(symbol_index - 1).unwrap().is_ascii_alphabetic()
+                                    && !naming
+                                    && string_stack.is_empty()
+                                    && !expression_stack.is_empty()
+                                    && !expression_stack.ends_with(|c| is_operator(&c)) {
+                                        expression_stack.push('*');
+                                    }
+                                    
+                                    expression_stack.push_str(var.1.unwrap_or_else(|| 0.0).to_string().as_str());
+                                    string_stack = String::new();
+                                    println!("{}", expression_stack);
+                                },
+                                None => {}
+                            }
                         }
 
                         continue;
@@ -98,6 +128,9 @@ impl SyntaxParser {
                 expression_stack = String::new();
             }
 
+            if !string_stack.is_empty() {
+                println!("\u{001b}[0;33mWarning: Line {}: Unknown letters '{}' \u{001b}[0;39m(If it's part of a long variable name, try surrounding it in [])\u{001b}[0;m", line_number + 1, string_stack);
+            }
         }
 
         if std::env::args().len() > 2 && std::env::args().nth(2).eq(&Some("true".to_string())) {

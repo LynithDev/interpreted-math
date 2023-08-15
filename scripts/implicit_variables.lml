@@ -1,0 +1,5 @@
+# Variables can be implicitly multiplied
+$a = 2
+$b = 3
+
+ab # Returns 6 because ab = 2 * 3

@@ -1,0 +1,8 @@
+# Because of implicit variable multiplication, the interpreter 
+# does not know if the current 'variable' is one variable or many implicitly declared variables.
+# To fix this, you can surround your long variables in square brackets: [var]
+# Example:
+
+$a = 3
+$apple = 5
+apple # Returns 3, and a warning because it couldn't find any variables called "pple"

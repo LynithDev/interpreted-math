@@ -1,0 +1,4 @@
+# See long_variables.lml
+$a = 3
+$apple = 5
+[apple] # returns 5

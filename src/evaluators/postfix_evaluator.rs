@@ -51,7 +51,7 @@ impl Evaluator for PostfixEvaluator {
 
         match stack.last() {
             Some(stack) => Ok(stack.to_owned()),
-            None => Err("Could not parse expression".into())
+            None => Err("Could not evaluate the parsed expression".into())
         }
     }
 }

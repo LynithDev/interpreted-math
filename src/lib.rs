@@ -1,7 +1,6 @@
 pub mod parsers;
 pub mod evaluators;
-pub mod token;
-pub mod token_type;
+pub mod types;
 
 pub fn preced(symbol: &char) -> u8 {
     match symbol {
@@ -14,7 +13,7 @@ pub fn preced(symbol: &char) -> u8 {
 
 pub fn is_operator(symbol: &char) -> bool {
     match symbol {
-        '+' | '-' | '/' | '*' => true,
+        '+' | '-' | '/' | '*' | '^' => true,
         _ => false
     }
 }

@@ -1,4 +1,4 @@
-use crate::{token::{Token, find_variable}, token_type::TokenType, evaluators::{postfix_evaluator::PostfixEvaluator, Evaluator}, is_operator};
+use crate::{evaluators::{postfix_evaluator::PostfixEvaluator, Evaluator}, is_operator, types::variable::Variable};
 
 use super::{Parser, infix_parser::InfixParser};
 
@@ -10,7 +10,7 @@ impl SyntaxParser {
     }
     
     fn parse(&self, input: &str) -> Result<Option<String>, Box<dyn std::error::Error>> {
-        let mut tokens: Vec<Token> = Vec::new();
+        let mut variables: Vec<Variable> = Vec::new();
 
         let mut expression_stack: String = String::new();
         let mut string_stack: String = String::new();
@@ -51,9 +51,9 @@ impl SyntaxParser {
                                 string_stack.pop();
                             }
                             
-                            match find_variable(&tokens, string_stack.to_owned()) {
+                            match Variable::find_variable(string_stack.as_str(), &variables) {
                                 Some(var) => {
-                                    string_stack.truncate(string_stack.len() - var.0.len());
+                                    string_stack.truncate(string_stack.len() - var.name.len());
                                     
                                     if symbol_index != 0 
                                     && line.chars().nth(symbol_index - 1).is_some()
@@ -65,7 +65,7 @@ impl SyntaxParser {
                                         expression_stack.push('*');
                                     }
                                     
-                                    expression_stack.push_str(var.1.unwrap_or_else(|| 0.0).to_string().as_str());
+                                    expression_stack.push_str(var.value.unwrap_or_else(|| 0.0).to_string().as_str());
                                     string_stack = String::new();
                                 },
                                 None => {}
@@ -78,18 +78,13 @@ impl SyntaxParser {
                     '=' | '\n' => { // Termination for variables
                         if naming && !string_stack.is_empty() {
                             // Remove duplicate variables
-                            for (i, token) in tokens.to_owned().iter().enumerate() {
-                                match &token.token_type {
-                                    TokenType::Variable { name, value:_ } => {
-                                        if name.eq(string_stack.to_owned().as_str()) {
-                                            tokens.remove(i);
-                                        }
-                                    },
-                                    _ => {}
+                            for (i, var) in variables.to_owned().iter().enumerate() {
+                                if var.name.eq(string_stack.to_owned().as_str()) {
+                                    variables.remove(i);
                                 }
                             }
 
-                            tokens.push(Token::new(TokenType::new_variable(string_stack.to_owned(), None)));
+                            variables.push(Variable::new(string_stack.to_owned(), None));
                             naming = false;
                             string_stack = String::new();
                             continue;
@@ -114,26 +109,12 @@ impl SyntaxParser {
                 };
 
                 if !line.starts_with("$") {
-                    tokens.push(Token::new(
-                        TokenType::Expression { 
-                            value
-                        }
-                    ));
+                    return Ok(Some(value.to_string()));
                 } else {
-                    let token = tokens.pop();
+                    let var = variables.pop();
 
-                    if let Some(token) = token.to_owned() {
-                        match token.token_type {
-                            TokenType::Variable { name, value: _ } => {
-                                tokens.push(Token::new(
-                                    TokenType::Variable { 
-                                        name, 
-                                        value: Some(value)
-                                    }
-                                ));
-                            },
-                            _ => {}
-                        }
+                    if let Some(var) = var {
+                        variables.push(Variable::new(var.name, Some(value)))
                     }
                 }
 
@@ -145,18 +126,20 @@ impl SyntaxParser {
             }
         }
 
-        if std::env::args().len() > 2 && std::env::args().nth(2).eq(&Some("true".to_string())) {
-            println!("{:#?}", tokens);
-        }
+        // if std::env::args().len() > 2 && std::env::args().nth(2).eq(&Some("true".to_string())) {
+        //     println!("{:#?}", tokens);
+        // }
         
-        for token in tokens {
-            match token.token_type {
-                TokenType::Expression { value } => {
-                    return Ok(Some(value.to_string()));
-                },
-                _ => {}
-            }
-        }
+        // for token in tokens {
+        //     match token.token_type {
+        //         TokenType::Expression { value } => {
+        //             return Ok(Some(value.to_string()));
+        //         },
+        //         _ => {}
+        //     }
+        // }
+
+        
 
         Ok(None)
     }

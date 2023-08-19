@@ -21,8 +21,8 @@ impl Parser for InfixParser {
                     postfix.push(symbol);
                 },
 
-                // Opening parantheses or power of
-                '(' | '^' => {
+                // Opening parantheses
+                '(' => {
                     stack.push(symbol);
                 }
 

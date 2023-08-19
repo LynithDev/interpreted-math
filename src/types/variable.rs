@@ -15,10 +15,10 @@ impl Variable {
         Variable::new(name, None)
     }
 
-    pub fn find_variable(name: &str, list: &Vec<Variable>) -> Option<Variable> {
+    pub fn find_variable<'a>(name: &'a str, list: &'a Vec<Variable>) -> Option<&'a Variable> {
         for var in list {
             if var.name.eq(name) {
-                return Some(var.to_owned());
+                return Some(var);
             }
         }
 

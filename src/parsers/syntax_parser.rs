@@ -154,23 +154,30 @@ impl SyntaxParser {
                         if naming && !string_stack.is_empty() {
                             
                             if function_mode {
+                                let mut new_func = Function::new(string_stack.to_owned(), None, Vec::new());
+
                                 // Remove duplicate functions
                                 for (i, func) in functions.to_owned().iter().enumerate() {
                                     if func.name.eq(string_stack.to_owned().as_str()) {
+                                        new_func.code = func.code.to_owned();
+                                        new_func.arguments = func.arguments.to_owned();
                                         functions.remove(i);
                                     }
                                 }
 
-                                functions.push(Function::new(string_stack.to_owned(), None, Vec::new()));
+                                functions.push(new_func);
                             } else {
+                                let mut new_var = Variable::new(string_stack.to_owned(), None);
+
                                 // Remove duplicate variables
                                 for (i, var) in variables.to_owned().iter().enumerate() {
                                     if var.name.eq(string_stack.to_owned().as_str()) {
+                                        new_var.value = var.value.to_owned();
                                         variables.remove(i);
                                     }
                                 }
 
-                                variables.push(Variable::new(string_stack.to_owned(), None));
+                                variables.push(new_var);
                             }
 
                             naming = false;
